@@ -1,6 +1,11 @@
+import 'package:chat_app/services/auth.dart';
+import 'package:chat_app/services/database.dart';
 import 'package:chat_app/views/chat_room_screen.dart';
 import 'package:chat_app/widget/widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../helper/helper_function.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggle;
@@ -11,6 +16,46 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  AuthMethods authMethods = AuthMethods();
+  DatabaseMethods databaseMethods = DatabaseMethods();
+  final formKey = GlobalKey<FormState>();
+  TextEditingController emailTextEditingController = TextEditingController();
+  TextEditingController passswordTextEditingController =
+      TextEditingController();
+  dynamic snapshotUserInfo;
+
+  bool isLoading = false;
+
+  signIn() {
+    if (formKey.currentState!.validate()) {
+      HelperFunction.saveUserEmailSharedPreferences(
+          emailTextEditingController.text);
+
+      setState(() {
+        isLoading = true;
+      });
+
+      databaseMethods
+          .getUserByUserEmail(emailTextEditingController.text)
+          .then((value) {
+        snapshotUserInfo = value;
+        HelperFunction.saveUserNameSharedPreferences(
+            snapshotUserInfo.document[0].data['name']);
+      });
+
+      authMethods
+          .signInWithEmailAndPassoword(emailTextEditingController.text,
+              passswordTextEditingController.text)
+          .then((value) {
+        if (value != null) {
+          HelperFunction.saveUserLoggedInSharedPreferences(true);
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const ChatRoom()));
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,13 +72,34 @@ class _SignInState extends State<SignIn> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  style: simpleTextStyle(),
-                  decoration: textInputDecoration('Email'),
-                ),
-                TextField(
-                  style: simpleTextStyle(),
-                  decoration: textInputDecoration('Password'),
+                Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        validator: (value) {
+                          return RegExp(r'\S+@\S+\.\S+')
+                                  .hasMatch(value.toString())
+                              ? null
+                              : 'Please provide a valid Email address';
+                        },
+                        controller: emailTextEditingController,
+                        style: simpleTextStyle(),
+                        decoration: textInputDecoration('Email'),
+                      ),
+                      TextFormField(
+                        obscureText: true,
+                        validator: (value) {
+                          return value!.length < 6
+                              ? " Weak Password.\nThe Password must be more than 6 characters "
+                              : null;
+                        },
+                        controller: passswordTextEditingController,
+                        style: simpleTextStyle(),
+                        decoration: textInputDecoration('Password'),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(
                   height: 10,
@@ -54,10 +120,7 @@ class _SignInState extends State<SignIn> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ChatRoom()));
+                    signIn();
                   },
                   style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
