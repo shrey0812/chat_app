@@ -44,6 +44,7 @@ class _AppState extends State<App> {
 
   @override
   void initState() {
+    getLoggedIn();
     super.initState();
   }
 
@@ -62,19 +63,5 @@ class _AppState extends State<App> {
             ? const ChatRoom()
             : const Authenticate()
         : const Authenticate();
-  }
-}
-
-class IAmBlank extends StatefulWidget {
-  const IAmBlank({Key? key}) : super(key: key);
-
-  @override
-  State<IAmBlank> createState() => _IAmBlankState();
-}
-
-class _IAmBlankState extends State<IAmBlank> {
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }

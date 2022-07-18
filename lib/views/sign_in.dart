@@ -30,17 +30,16 @@ class _SignInState extends State<SignIn> {
     if (formKey.currentState!.validate()) {
       HelperFunction.saveUserEmailSharedPreferences(
           emailTextEditingController.text);
-
-      setState(() {
-        isLoading = true;
-      });
-
       databaseMethods
           .getUserByUserEmail(emailTextEditingController.text)
           .then((value) {
         snapshotUserInfo = value;
         HelperFunction.saveUserNameSharedPreferences(
             snapshotUserInfo.document[0].data['name']);
+      });
+
+      setState(() {
+        isLoading = true;
       });
 
       authMethods

@@ -1,7 +1,9 @@
+import 'package:chat_app/helper/authenticate.dart';
 import 'package:chat_app/helper/helper_function.dart';
 import 'package:chat_app/services/auth.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_app/views/chat_room_screen.dart';
+import 'package:chat_app/views/sign_in.dart';
 import 'package:flutter/material.dart';
 
 import '../widget/widget.dart';
@@ -171,14 +173,24 @@ class _SignUpState extends State<SignUp> {
                             onTap: () {
                               widget.toggle;
                             },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: const Text(
-                                "Sign In now",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                    decoration: TextDecoration.underline),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Authenticate()));
+                              },
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                child: const Text(
+                                  "Sign In now",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      decoration: TextDecoration.underline),
+                                ),
                               ),
                             ),
                           )
